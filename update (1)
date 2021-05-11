@@ -1,0 +1,152 @@
+import logging
+import sys
+import boto3
+import os
+import requests
+import time
+import json
+from botocore.exceptions import ClientError
+from morpheuscypher import Cypher
+from pprint import pprint
+from random import randrange
+
+# pprint(morpheus) # used only for debugging
+
+# SET START TIME
+ts = time.strftime('%Y-%m-%d_%I-%M-%p', time.localtime())
+
+# GET VARS FROM MORPHEUS OBJECT AND CUSTOM OPTIONS
+morpheus_url = morpheus['morpheus']['applianceUrl']
+morpheus_user = morpheus['username']
+morpheus_cloud = morpheus['customOptions']['ot_cloud'].split('|')[0]
+morpheus_api = f'{morpheus_url}/api'
+morpheus_clouds_api = f'{morpheus_api}/zones/{morpheus_cloud}'
+morpheus_instances_api = f'{morpheus_api}/instances'
+morpheus_workflow_name = 'OnePoint - Day 2 Action'
+morpheus_api_token = sys.argv[1]
+template_path = morpheus['customOptions']['ot_template_path']
+cf_stack_name = morpheus['customOptions']['ot_cf_stack_name']
+
+# GET SECRETS FROM CYPHER
+c = Cypher(url=morpheus_url, token=morpheus_api_token)
+secrets = c.get('secret/IANV-INP')
+aws_access_key = secrets['accessKey']
+aws_secret_key = secrets['secretKey']
+
+# START LOG
+loglevel = logging.INFO  # https://docs.python.org/3/howto/logging.html
+logfile = 'update_cf_stack.log'
+while os.path.exists(logfile):
+    logfile = f'{randrange(1000)}_{logfile}'
+
+logging.basicConfig(filename=logfile, level=loglevel, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
+
+logging.info(f'Workflow Being Run: {morpheus_workflow_name}')
+logging.info(f'Workflow Run By: {morpheus_user}')
+
+# DEFINE FUNCTIONS
+
+
+def upload_file(file_name, bucket, access_key, secret_key, object_name=None):
+    if object_name is None:
+        object_name = file_name
+
+    s3_client = boto3.client(
+        's3',
+        aws_access_key_id=access_key,
+        aws_secret_access_key=secret_key
+    )
+    try:
+        s3_client.upload_file(file_name, bucket, object_name)
+    except ClientError as e:
+        pprint('Uploading the report to s3 failed because of this error:')
+        pprint(e)
+        return False
+    return True
+
+
+def get_endpoint(token, endpoint):
+    url = endpoint
+    method = 'get'
+    headers = {'Authorization': f'BEARER {token}', 'Content-Type': 'application/json'}
+    sslverify = True
+    r = getattr(requests, method)(
+        url,
+        headers=headers,
+        verify=sslverify
+    )
+    return json.loads(r.text)
+
+
+def get_sts_creds(aws_access_key, aws_secret_key, role_arn):
+    sts_client = boto3.client('sts', aws_access_key_id=aws_access_key, aws_secret_access_key=aws_secret_key)
+    assumed_role_object = sts_client.assume_role(
+        RoleArn=role_arn,
+        RoleSessionName=f'onepoint-{randrange(1000)}-session'
+    )
+    credentials = assumed_role_object['Credentials']
+    return credentials
+
+def modify_cf_stack(stack_name, template, region, credentials):
+    cf_client = boto3.client(
+        'cloudformation',
+        aws_access_key_id=credentials['AccessKeyId'],
+        aws_secret_access_key=credentials['SecretAccessKey'],
+        aws_session_token=credentials['SessionToken'],
+        region_name=region
+    )
+    cf_client.update_stack(
+        StackName=stack_name,
+        TemplateBody=template,
+        Capabilities=[
+            'CAPABILITY_IAM',
+            'CAPABILITY_NAMED_IAM'
+        ]
+    )
+    return True
+
+
+# START LOGIC
+# get cloud info and assume role based on cloud
+cloud_info = get_endpoint(morpheus_api_token, morpheus_clouds_api)
+cloud_region = cloud_info['zone']['regionCode'].split('.')[1].lower()
+cloud_role_arn = cloud_info['zone']['config']['stsAssumeRole']
+credentials = get_sts_creds(aws_access_key, aws_secret_key, cloud_role_arn)
+template_body = open(template_path).read()
+
+logging.info(f'Stack Being Updated: {cf_stack_name}')
+
+# update the cf stack
+modify_cf_stack(cf_stack_name, template_body, cloud_region, credentials)
+
+# print log to console then upload it to s3
+with open(logfile, 'r') as fi:
+    print(fi.read())
+
+s3_bucket_name = "wanv-sap-9-s3-morpheus-data-001"
+s3_file_name = f'cft-update-logs/cft-update-{cf_stack_name}-{ts}.log'
+upload_file(logfile, s3_bucket_name, aws_access_key, aws_secret_key, s3_file_name)
+
+exit(0) 
+
+### ABOUT THIS SCRIPT ###
+# Contact
+# Peter Georgopoulos, Technologent
+# peter.georgopoulos@technologent.com
+
+# Purpose
+# This script takes input from Morpheus and uses it to interact with AWS APIs such that
+# a CloudFormation stack's template is updated to reflect a change requested by the user.
+# Specifically it follows these steps:
+# 1. Define type name of stack and new template body file.
+# 2. Define cloud and region the resource lives in.
+# 3. Using Morpheus metadata about a cloud, get credentials for that cloud via AWS API.
+# 4. Update the specified stack's template corresponding to the requested change.
+# 5. Log the time and which workflow ran, by which user, and what was updated.
+
+# Known Issues
+# Lacking error checks for many action statements
+
+# Improvements
+# Argument intake could be improved using something like argparser Specifically for log level and token for cypher access.
+# add a while loop tracking change to cf stack after modification call

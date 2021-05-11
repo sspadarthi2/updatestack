@@ -1,0 +1,1046 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "AWS Cloudformation for ECS fargate Service using Morpheus",
+    "Mappings": {
+        "MorpheusMap": {
+            "SubnetA": {
+                "Name": "<%=customOptions.subnetid1%>"
+            },
+            "SubnetB": {
+                "Name": "<%=customOptions.subnetid2%>"
+            },
+            "SubnetC": {
+                "Name": "<%=customOptions.subnetid3%>"
+            },
+            "ClusterName": {
+                "Name": "<%=customOptions.ECSFargateClustername%>"
+            },
+            "ServiceName": {
+                "Name": "<%=customOptions.ECSFargateServiceName%>"
+            },
+            "Family": {
+                "Name": "<%=customOptions.ECSFargateFamily%>"
+            },
+            "Imageid": {
+                "Name": "<%=customOptions.ECSFargateImageID%>"
+            },
+            "SidecarImageid": {
+                "Name": "<%=customOptions.ECSFargateSideCarImageID%>"
+            },
+            "ContainerPort": {
+                "Name": "<%=customOptions.ECSFargateContainerPort%>"
+            },
+            "ContainerSecurityGroup1": {
+                "Name": "<%=customOptions.ECSFargateSecurityGroup1%>"
+            },
+            "ContainerSecurityGroup2": {
+                "Name": "<%=customOptions.ECSFargateSecurityGroup2%>"
+            },
+            "TaskDefinitionCpu": {
+                "Name": "<%=customOptions.ECSFargateTaskDefinitionCpu%>"
+            },
+            "TaskDefinitionMemory": {
+                "Name": "<%=customOptions.ECSFargateTaskDefinitionMemory%>"
+            },
+            "ContainerDefinitionCpu": {
+                "Name": "<%=customOptions.ECSFargateContainerDefinitionCpu%>"
+            },
+            "ContainerDefinitionMemory": {
+                "Name": "<%=customOptions.ECSFargateContainerDefinitionMemory%>"
+            },
+            "LandingZone": {
+                "Name": "<%=customOptions.ECSFargateLandingZone%>"
+            },
+            "AwsRegion": {
+                "Name": "<%=customOptions.ECSFargateAWSRegion%>"
+            },
+            "ServiceId": {
+                "Name": "<%=customOptions.ECSFargateServiceId%>"
+            },
+            "ServiceBuildId": {
+                "Name": "<%=customOptions.ECSFargateServiceBuildId%>"
+            },
+            "EnvironmentServiceName": {
+                "Name": "<%=customOptions.ECSFargateEnvServiceName%>"
+            },
+            "ConfigServerURI": {
+                "Name": "<%=customOptions.ECSFargateConfigServerURI%>"
+            },
+            "SecretsManagerServiceURL": {
+                "Name": "<%=customOptions.ECSFargateSecretsManagerServiceURL%>"
+            },
+            "ExecutionRoleARN": {
+                "Name": "<%=customOptions.ECSFargateExecutionRoleARN%>"
+            },
+            "TaskRoleARN": {
+                "Name": "<%=customOptions.ECSFargateTaskRoleARN%>"
+            },
+            "VolumesList": {
+                "Name": "<%=customOptions.ECSFargateVolumes%>"
+            },
+            "DesiredCount": {
+                "Name": "<%=customOptions.ECSFargateDesiredCount%>"
+            },
+            "TargetGroupARN": {
+                "Name": "<%=customOptions.ELBTargetGroupARN%>"
+            },
+            "LogGroup1": {
+                "Name": "<%=customOptions.ECSFargateLogGroup1%>"
+            },
+            "LogGroup2": {
+                "Name": "<%=customOptions.ECSFargateLogGroup2%>"
+            },
+            "Service": {
+                "Name": "<%=customOptions.Service%>"
+            },
+            "Names": {
+                "Name": "<%=customOptions.Name%>"
+            },
+            "ProductTower": {
+                "Name": "<%=customOptions.ProductTower%>"
+            },
+            "ApplicationName": {
+                "Name": "<%=customOptions.ApplicationName%>"
+            },
+            "ApplicationCode": {
+                "Name": "<%=customOptions.ApplicationCode%>"
+            },
+            "SupportContact": {
+                "Name": "<%=customOptions.SupportContact%>"
+            },
+            "ApplicationOwner": {
+                "Name": "<%=customOptions.ApplicationOwner%>"
+            },
+            "Domain": {
+                "Name": "<%=customOptions.Domain%>"
+            },
+            "PatchGroup": {
+                "Name": "<%=customOptions.PatchGroup%>"
+            },
+            "RequestId": {
+                "Name": "<%=customOptions.RequestId%>"
+            },
+            "Describe": {
+                "Name": "<%=customOptions.Description%>"
+            },
+            "CostCenter": {
+                "Name": "<%=customOptions.CostCenter%>"
+            },
+            "Environment": {
+                "Name": "<%=customOptions.environment%>"
+            },
+            "Automation": {
+                "Name": "<%=customOptions.Automation%>"
+            },
+            "BuiltBy": {
+                "Name": "<%=customOptions.builtby%>"
+            },
+            "MigratedFrom": {
+                "Name": "<%=customOptions.migratedfrom%>"
+            },
+            "SecurityPosture": {
+                "Name": "<%=customOptions.SecurityPosture%>"
+            },
+            "aws-migration-project-id": {
+                "Name": "<%=customOptions.awsmigrationprojectid%>"
+            },
+            "BusinessUnit": {
+                "Name": "<%=customOptions.BusinessUnit%>"
+            },
+            "CSP": {
+                "Name": "<%=customOptions.CSP%>"
+            },
+            "CostCode": {
+                "Name": "<%=customOptions.CostCode%>"
+            }
+        }
+    },
+    "Resources": {
+        "TaskDefinition": {
+            "Type": "AWS::ECS::TaskDefinition",
+            "Properties": {
+                "NetworkMode": "awsvpc",
+                "RequiresCompatibilities": [
+                    "FARGATE"
+                ],
+                "Cpu": {
+                    "Fn::FindInMap": [
+                        "MorpheusMap",
+                        "TaskDefinitionCpu",
+                        "Name"
+                    ]
+                },
+                "Memory": {
+                    "Fn::FindInMap": [
+                        "MorpheusMap",
+                        "TaskDefinitionMemory",
+                        "Name"
+                    ]
+                },
+                "ExecutionRoleArn": {
+                    "Fn::FindInMap": [
+                        "MorpheusMap",
+                        "ExecutionRoleARN",
+                        "Name"
+                    ]
+                },
+                "TaskRoleArn": {
+                    "Fn::FindInMap": [
+                        "MorpheusMap",
+                        "TaskRoleARN",
+                        "Name"
+                    ]
+                },
+                "Volumes": [
+                    {
+                        "Name": "v0"
+                    },
+                    {
+                        "Name": "v1"
+                    },
+                    {
+                        "Name": "v2"
+                    },
+                    {
+                        "Name": "v3"
+                    },
+                    {
+                        "Name": "v4"
+                    },
+                    {
+                        "Name": "frgmount"
+                    }
+                ],
+                "ContainerDefinitions": [
+                    {
+                        "Name": {
+                            "Fn::FindInMap": [
+                                "MorpheusMap",
+                                "Family",
+                                "Name"
+                            ]
+                        },
+                        "Image": {
+                            "Fn::FindInMap": [
+                                "MorpheusMap",
+                                "Imageid",
+                                "Name"
+                            ]
+                        },
+                        "Cpu": {
+                            "Fn::FindInMap": [
+                                "MorpheusMap",
+                                "ContainerDefinitionCpu",
+                                "Name"
+                            ]
+                        },
+                        "Memory": {
+                            "Fn::FindInMap": [
+                                "MorpheusMap",
+                                "ContainerDefinitionMemory",
+                                "Name"
+                            ]
+                        },
+                        "DependsOn": [
+                            {
+                                "Condition": "COMPLETE",
+                                "ContainerName": "s3tofrgmount"
+                            }
+                        ],
+                        "VolumesFrom": [
+                            {
+                                "SourceContainer": "s3tofrgmount"
+                            }
+                        ],
+                        "MountPoints": [
+                            {
+                                "SourceVolume": "v0",
+                                "ContainerPath": {
+                                    "Fn::Select": [
+                                        "0",
+                                        {
+                                            "Fn::Split": [
+                                                ",",
+                                                {
+                                                    "Fn::FindInMap": [
+                                                        "MorpheusMap",
+                                                        "VolumesList",
+                                                        "Name"
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "SourceVolume": "v1",
+                                "ContainerPath": {
+                                    "Fn::Select": [
+                                        "1",
+                                        {
+                                            "Fn::Split": [
+                                                ",",
+                                                {
+                                                    "Fn::FindInMap": [
+                                                        "MorpheusMap",
+                                                        "VolumesList",
+                                                        "Name"
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "SourceVolume": "v2",
+                                "ContainerPath": {
+                                    "Fn::Select": [
+                                        "2",
+                                        {
+                                            "Fn::Split": [
+                                                ",",
+                                                {
+                                                    "Fn::FindInMap": [
+                                                        "MorpheusMap",
+                                                        "VolumesList",
+                                                        "Name"
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "SourceVolume": "v3",
+                                "ContainerPath": {
+                                    "Fn::Select": [
+                                        "3",
+                                        {
+                                            "Fn::Split": [
+                                                ",",
+                                                {
+                                                    "Fn::FindInMap": [
+                                                        "MorpheusMap",
+                                                        "VolumesList",
+                                                        "Name"
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            },
+                            {
+                                "SourceVolume": "v4",
+                                "ContainerPath": {
+                                    "Fn::Select": [
+                                        "4",
+                                        {
+                                            "Fn::Split": [
+                                                ",",
+                                                {
+                                                    "Fn::FindInMap": [
+                                                        "MorpheusMap",
+                                                        "VolumesList",
+                                                        "Name"
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            }
+                        ],
+                        "Environment": [
+                            {
+                                "Name": "AWSREGION",
+                                "Value": {
+                                    "Fn::FindInMap": [
+                                        "MorpheusMap",
+                                        "AwsRegion",
+                                        "Name"
+                                    ]
+                                }
+                            },
+                            {
+                                "Name": "LANDINGZONE",
+                                "Value": {
+                                    "Fn::FindInMap": [
+                                        "MorpheusMap",
+                                        "LandingZone",
+                                        "Name"
+                                    ]
+                                }
+                            },
+                            {
+                                "Name": "SERVICEID",
+                                "Value": {
+                                    "Fn::FindInMap": [
+                                        "MorpheusMap",
+                                        "ServiceId",
+                                        "Name"
+                                    ]
+                                }
+                            },
+                            {
+                                "Name": "SERVICENAME",
+                                "Value": {
+                                    "Fn::FindInMap": [
+                                        "MorpheusMap",
+                                        "EnvironmentServiceName",
+                                        "Name"
+                                    ]
+                                }
+                            },
+                            {
+                                "Name": "SERVICEBUILDID",
+                                "Value": {
+                                    "Fn::FindInMap": [
+                                        "MorpheusMap",
+                                        "ServiceBuildId",
+                                        "Name"
+                                    ]
+                                }
+                            },
+                            {
+                                "Name": "CONFIGSERVERURI",
+                                "Value": {
+                                    "Fn::FindInMap": [
+                                        "MorpheusMap",
+                                        "ConfigServerURI",
+                                        "Name"
+                                    ]
+                                }
+                            },
+                            {
+                                "Name": "SECRETSMANAGERSERVICEURL",
+                                "Value": {
+                                    "Fn::FindInMap": [
+                                        "MorpheusMap",
+                                        "SecretsManagerServiceURL",
+                                        "Name"
+                                    ]
+                                }
+                            },
+                            {
+                                "Name": "SPRING_OPTS",
+                                "Value": "--spring.profiles.active=prodgreen"
+                            }
+                        ],
+                        "PortMappings": [
+                            {
+                                "ContainerPort": {
+                                    "Fn::FindInMap": [
+                                        "MorpheusMap",
+                                        "ContainerPort",
+                                        "Name"
+                                    ]
+                                }
+                            }
+                        ],
+                        "LogConfiguration": {
+                            "LogDriver": "awslogs",
+                            "Options": {
+                                "awslogs-region": {
+                                    "Ref": "AWS::Region"
+                                },
+                                "awslogs-group": {
+                                    "Fn::FindInMap": [
+                                        "MorpheusMap",
+                                        "LogGroup1",
+                                        "Name"
+                                    ]
+                                },
+                                "awslogs-stream-prefix": "ecs"
+                            }
+                        }
+                    },
+                    {
+                        "Name": "s3tofrgmount",
+                        "Image": {
+                            "Fn::FindInMap": [
+                                "MorpheusMap",
+                                "SidecarImageid",
+                                "Name"
+                            ]
+                        },
+                        "MountPoints": [
+                            {
+                                "SourceVolume": "frgmount",
+                                "ContainerPath": "/frgmount"
+                            }
+                        ],
+                        "Environment": [
+                            {
+                                "Name": "KEYSTOREBUCKET",
+                                "Value": "wanv-dpa-9-s3-keystore-001"
+                            }
+                        ],
+                        "LogConfiguration": {
+                            "LogDriver": "awslogs",
+                            "Options": {
+                                "awslogs-group": {
+                                    "Fn::FindInMap": [
+                                        "MorpheusMap",
+                                        "LogGroup2",
+                                        "Name"
+                                    ]
+                                },
+                                "awslogs-region": {
+                                    "Ref": "AWS::Region"
+                                },
+                                "awslogs-stream-prefix": "ecs"
+                            }
+                        },
+                        "Essential": "false"
+                    }
+                ],
+                "Family": {
+                    "Fn::FindInMap": [
+                        "MorpheusMap",
+                        "Family",
+                        "Name"
+                    ]
+                },
+                "Tags": [
+                    {
+                        "Key": "Service",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "MorpheusMap",
+                                "Service",
+                                "Name"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "MorpheusMap",
+                                "Names",
+                                "Name"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "ProductTower",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "MorpheusMap",
+                                "ProductTower",
+                                "Name"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "ApplicationName",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "MorpheusMap",
+                                "ApplicationName",
+                                "Name"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "ApplicationCode",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "MorpheusMap",
+                                "ApplicationCode",
+                                "Name"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "SupportContact",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "MorpheusMap",
+                                "SupportContact",
+                                "Name"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "ApplicationOwner",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "MorpheusMap",
+                                "ApplicationOwner",
+                                "Name"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "Domain",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "MorpheusMap",
+                                "Domain",
+                                "Name"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "PatchGroup",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "MorpheusMap",
+                                "PatchGroup",
+                                "Name"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "RequestId",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "MorpheusMap",
+                                "RequestId",
+                                "Name"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "Description",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "MorpheusMap",
+                                "Describe",
+                                "Name"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "CostCenter",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "MorpheusMap",
+                                "CostCenter",
+                                "Name"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "Environment",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "MorpheusMap",
+                                "Environment",
+                                "Name"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "Automation",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "MorpheusMap",
+                                "Automation",
+                                "Name"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "BuiltBy",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "MorpheusMap",
+                                "BuiltBy",
+                                "Name"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "MigratedFrom",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "MorpheusMap",
+                                "MigratedFrom",
+                                "Name"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "SecurityPosture",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "MorpheusMap",
+                                "SecurityPosture",
+                                "Name"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "aws-migration-project-id",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "MorpheusMap",
+                                "aws-migration-project-id",
+                                "Name"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "BusinessUnit",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "MorpheusMap",
+                                "BusinessUnit",
+                                "Name"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "CSP",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "MorpheusMap",
+                                "CSP",
+                                "Name"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "CostCode",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "MorpheusMap",
+                                "CostCode",
+                                "Name"
+                            ]
+                        }
+                    }
+                ]
+            }
+        },
+        "Service": {
+            "Type": "AWS::ECS::Service",
+            "Properties": {
+                "ServiceName": {
+                    "Fn::FindInMap": [
+                        "MorpheusMap",
+                        "ServiceName",
+                        "Name"
+                    ]
+                },
+                "Cluster": {
+                    "Fn::FindInMap": [
+                        "MorpheusMap",
+                        "ClusterName",
+                        "Name"
+                    ]
+                },
+                "TaskDefinition": {
+                    "Ref": "TaskDefinition"
+                },
+                "DesiredCount": {
+                    "Fn::FindInMap": [
+                        "MorpheusMap",
+                        "DesiredCount",
+                        "Name"
+                    ]
+                },
+                "LaunchType": "FARGATE",
+                "NetworkConfiguration": {
+                    "AwsvpcConfiguration": {
+                        "AssignPublicIp": "DISABLED",
+                        "Subnets": [
+                            {
+                                "Fn::FindInMap": [
+                                    "MorpheusMap",
+                                    "SubnetA",
+                                    "Name"
+                                ]
+                            },
+                            {
+                                "Fn::FindInMap": [
+                                    "MorpheusMap",
+                                    "SubnetB",
+                                    "Name"
+                                ]
+                            },
+                            {
+                                "Fn::FindInMap": [
+                                    "MorpheusMap",
+                                    "SubnetC",
+                                    "Name"
+                                ]
+                            }
+                        ],
+                        "SecurityGroups": [
+                            {
+                                "Fn::FindInMap": [
+                                    "MorpheusMap",
+                                    "ContainerSecurityGroup1",
+                                    "Name"
+                                ]
+                            },
+                            {
+                                "Fn::FindInMap": [
+                                    "MorpheusMap",
+                                    "ContainerSecurityGroup2",
+                                    "Name"
+                                ]
+                            }
+                        ]
+                    }
+                },
+                "LoadBalancers": [
+                    {
+                        "ContainerName": {
+                            "Fn::FindInMap": [
+                                "MorpheusMap",
+                                "Family",
+                                "Name"
+                            ]
+                        },
+                        "ContainerPort": {
+                            "Fn::FindInMap": [
+                                "MorpheusMap",
+                                "ContainerPort",
+                                "Name"
+                            ]
+                        },
+                        "TargetGroupArn": {
+                            "Fn::FindInMap": [
+                                "MorpheusMap",
+                                "TargetGroupARN",
+                                "Name"
+                            ]
+                        }
+                    }
+                ],
+                "Tags": [
+                    {
+                        "Key": "Service",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "MorpheusMap",
+                                "Service",
+                                "Name"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "Name",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "MorpheusMap",
+                                "Names",
+                                "Name"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "ProductTower",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "MorpheusMap",
+                                "ProductTower",
+                                "Name"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "ApplicationName",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "MorpheusMap",
+                                "ApplicationName",
+                                "Name"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "ApplicationCode",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "MorpheusMap",
+                                "ApplicationCode",
+                                "Name"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "SupportContact",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "MorpheusMap",
+                                "SupportContact",
+                                "Name"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "ApplicationOwner",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "MorpheusMap",
+                                "ApplicationOwner",
+                                "Name"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "Domain",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "MorpheusMap",
+                                "Domain",
+                                "Name"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "PatchGroup",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "MorpheusMap",
+                                "PatchGroup",
+                                "Name"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "RequestId",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "MorpheusMap",
+                                "RequestId",
+                                "Name"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "Description",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "MorpheusMap",
+                                "Describe",
+                                "Name"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "CostCenter",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "MorpheusMap",
+                                "CostCenter",
+                                "Name"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "Environment",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "MorpheusMap",
+                                "Environment",
+                                "Name"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "Automation",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "MorpheusMap",
+                                "Automation",
+                                "Name"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "BuiltBy",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "MorpheusMap",
+                                "BuiltBy",
+                                "Name"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "MigratedFrom",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "MorpheusMap",
+                                "MigratedFrom",
+                                "Name"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "SecurityPosture",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "MorpheusMap",
+                                "SecurityPosture",
+                                "Name"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "aws-migration-project-id",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "MorpheusMap",
+                                "aws-migration-project-id",
+                                "Name"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "BusinessUnit",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "MorpheusMap",
+                                "BusinessUnit",
+                                "Name"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "CSP",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "MorpheusMap",
+                                "CSP",
+                                "Name"
+                            ]
+                        }
+                    },
+                    {
+                        "Key": "CostCode",
+                        "Value": {
+                            "Fn::FindInMap": [
+                                "MorpheusMap",
+                                "CostCode",
+                                "Name"
+                            ]
+                        }
+                    }
+                ]
+            }
+        }
+    },
+    "Outputs": {
+        "Service": {
+            "Value": {
+                "Ref": "Service"
+            }
+        },
+        "TaskDefinition": {
+            "Value": {
+                "Ref": "TaskDefinition"
+            }
+        }
+    }
+}
